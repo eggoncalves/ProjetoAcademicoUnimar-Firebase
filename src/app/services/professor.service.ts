@@ -25,27 +25,43 @@ export class ProfessorService {
     return collectionData(this.professoresColllection, {idField: 'id'}) as Observable<Professor[]>;
   }
 
+  buscarPorNomeExato(nome: string) {
+    if (!nome) {
+      return this.listar();
+    }
+
+    const filtro = query(this.professoresColllection, where('nome', '==', nome));
+    return collectionData(filtro, {idField: 'id'}) as Observable<Professor[]>;
+  } 
+
+  buscarPorNomeQueComeceCom(nome: string) {
+    if (!nome) {
+      return this.listar();
+    }
+
+    const filtro = query(this.professoresColllection, 
+      where('nome', '>=', nome),
+      where('nome', '<', nome + '\uf8ff'));
+    return collectionData(filtro, {idField: 'id'}) as Observable<Professor[]>;
+  }    
+
+  //Sincrono  
   // adicionar(professor: Professor) {
-  //   let app = initializeApp(environment.firebaseConfig);
-  //   let db = getFirestore(app);
-
-  //   const professoresCollection = collection(db, 'professores');
-  //   return addDoc(professoresCollection, professor);
+  //   return addDoc(this.professoresColllection, professor);
   // }
 
-  // atualizar(usuarioId: string, professor: Professor) {
-  //   let app = initializeApp(environment.firebaseConfig);
-  //   let db = getFirestore(app);
+  //Assincrono
+  async adicionar(professor: Professor) {
+    return await addDoc(this.professoresColllection, professor);
+  }  
 
-  //   const professorDoc = doc(db, `professores/${usuarioId}`);
-  //   return updateDoc(professorDoc, { ...professor });
-  // }
+  async atualizar(id: string, professor: Professor) {
+    const professorDoc = doc(this.firestore, 'professores', id);
+    return await updateDoc(professorDoc, {...professor});    
+  }
 
-  // excluir(usuarioId: string) {
-  //   let app = initializeApp(environment.firebaseConfig);
-  //   let db = getFirestore(app);
-
-  //   const professorDoc = doc(db, `professores/${usuarioId}`);
-  //   return deleteDoc(professorDoc);
-  // }
+  async excluir(id: string) {
+    const professorDoc = doc(this.firestore, `professores/${id}`);
+    return await deleteDoc(professorDoc);      
+  }
 }
